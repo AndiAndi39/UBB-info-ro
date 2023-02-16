@@ -1,0 +1,25 @@
+Cursul 4
+
+Indeferent de interpretare si de corectitudinea sau incorectitudinea operatiilor in baza 10
+asociate operatiile de adunare si scadere in baza 2 fuunctioneaza identic!!
+
+In momentul efectuari unei operatii de adunare sau scadere in baza 2 se efectueaza defapt simultan
+cate 2 operatii asociate in baza 10
+
+In consencita este nevoie si de 2 flaguri simultan diferite care sa se ocupe 
+fiecare de una din cele doua interpretari posibile : CF pt interpretarea fara semn
+si OF pentru interpretarea cu semn
+
+Avem de nevoie de imul si idiv pentru ca spre deosebire de adunare si scadere care functioneaza
+la fel in baza doi indeferent de interpretare cu semn sau fara semn inmultirea si impartirea cu semn
+si fara semn functioneaza diferit AAAAAAAAAAAAA!!!!(semnul strigarii)
+
+Ca urmare la adunare si la scadere nu exista necesitatea de a preciza anterior desfasurarii lor
+cum dorim sa fie interpretati operanzii si rezultatul deoarece oricum ele functioneaza la fel
+indeferent de cum dorim sa le interpretam
+
+Este suficient daca ne hotaram ulterior cum dorim ca rezultatul sau operazii sa fie interpretati
+In schimb inmultirea si impartirea nu functioneaza la fel in cele doua interpretari, aici existand
+necesitatea de a preciza anterior efectuarii unei inmultiri sau impartiri cum dorim sa fie interpretati
+operanzii
+

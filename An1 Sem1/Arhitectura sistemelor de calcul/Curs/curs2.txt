@@ -1,0 +1,17 @@
+Procesorul nu are notiunea de limite ale unor structuri logice de date!
+La nivelul programarii pe 32 de biti procesorul lucreza cu doar 3 tipuri de date: byte, word, doubleword (pe 32 de biti)
+Tip de data = structura + operatii asociate
+# tip_de_data.ce_fac(2,4)
+#OOP - incapsulare
+
+Pentru microprocesor, tip de data = dimensiune de reprezentare !!!
+
+Procesorul are o viziune extrem de primitiva asupra notiunii de tip de data, intelegand prin aceasta
+exclusiv dimensiunea de reprezentare a unei date si existand astfel in consecinta pe 32 de biti
+doar 3 tipuri de data: byte, word si double word pentru care exista in limbajul de asamblare
+3 directive specifice de definire a acestor valori: DB, DW, DD.
+
+DQ se poate defini si pe 64 de biti, dar nu poate fii manipulat ca si operand
+
+MECANISMUL DE EXECUTIE AL ORICARUI PROGRAM RESPECTA DISCIPLINA DE EXECUTIE DE TIP LIFO
+PRIN ORDINEA DE ACTIVARE SI EXECUTIE A UNITATILOR DE PROGRAM IMPLICATE

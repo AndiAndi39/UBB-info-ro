@@ -1,0 +1,87 @@
+     1                                  bits 32 ; assembling for the 32 bits architecture
+     2                                  
+     3                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     4                                  global start        
+     5                                  
+     6                                  ; declare external functions needed by our program
+     7                                  extern exit,printf,scanf               ; tell nasm that exit exists even if we won't be defining it
+     8                                  import exit msvcrt.dll
+     9                                  import printf msvcrt.dll
+    10                                  import scanf msvcrt.dll    ; exit is a function that ends the calling process. It is defined in msvcrt.dll
+    11                                                            ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
+    12                                  
+    13                                  ; our data is declared here (the variables needed by our program)
+    14                                  segment data use32 class=data
+    15                                      ; ...
+    16                                      
+    17 00000000 496E74726F64756365-         msg db "Introduceti un numar in baza 10:",0
+    17 00000009 746920756E206E756D-
+    17 00000012 617220696E2062617A-
+    17 0000001B 612031303A00       
+    18 00000021 256400                      format1 db "%d",0
+    19 00000024 00000000                    n1 dd 0
+    20 00000028 496E74726F64756365-         msg2 db "Introduceti un numar in baza 16:",0
+    20 00000031 746920756E206E756D-
+    20 0000003A 617220696E2062617A-
+    20 00000043 612031363A00       
+    21 00000049 257800                      format2 db "%x",0
+    22 0000004C 00000000                    n2 dd 0
+    23 00000050 52657A756C74617475-         msg3 db "Rezultatul are %d biti",0
+    23 00000059 6C2061726520256420-
+    23 00000062 6269746900         
+    24                                      
+    25                                      ; Sa se citeasca de la tastatura un numar in baza 10 si un numar in baza 16. Sa se afiseze in baza 10 numarul de biti 1 ai sumei celor doua numere citite. Exemplu:
+    26                                  ; a = 32 = 0010 0000b
+    27                                  ; b = 1Ah = 0001 1010b
+    28                                  ; 32 + 1Ah = 0011 1010b
+    29                                  ; Se va afisa pe ecran valoarea 4.
+    30                                  ; our code starts here
+    31                                  segment code use32 class=code
+    32                                      start:
+    33                                          ; ...
+    34 00000000 68[00000000]                    push dword msg  ; Afisam mesaj pentru citire
+    35 00000005 FF15[00000000]                  call [printf]
+    36 0000000B 83C404                          add esp, 4*1
+    37                                          
+    38 0000000E 68[24000000]                    push dword n1       ; Se citeste n1 in baza 10
+    39 00000013 68[21000000]                    push dword format1
+    40 00000018 FF15[00000000]                  call [scanf]
+    41 0000001E 83C408                          add esp, 4*2
+    42                                          
+    43                                          ; push dword [n1]     
+    44                                          ; push dword format1
+    45                                          ; call [printf]
+    46                                          ; add esp, 4*2
+    47                                          
+    48 00000021 68[28000000]                    push dword msg2     ; Afisam mesaj pentru citire
+    49 00000026 FF15[00000000]                  call [printf]
+    50 0000002C 83C404                          add esp, 4*1
+    51                                          
+    52 0000002F 68[4C000000]                    push dword n2       ; Se citeste n2 in baza 16
+    53 00000034 68[49000000]                    push dword format2
+    54 00000039 FF15[00000000]                  call [scanf]
+    55 0000003F 83C408                          add esp, 4*2
+    56                                          
+    57 00000042 A1[24000000]                    mov eax, [n1]
+    58 00000047 0305[4C000000]                  add eax, [n2]
+    59                                          
+    60 0000004D B920000000                      mov ecx, 32
+    61 00000052 BA00000000                      mov edx, 0
+    62                                          nr_biti:
+    63 00000057 51                                  push ecx
+    64                                              
+    65 00000058 B101                                mov cl, 1   
+    66 0000005A D3E8                                shr eax, cl
+    67 0000005C 83D200                              adc edx, 0
+    68 0000005F 59                                  pop ecx
+    69 00000060 E2F5                            loop nr_biti
+    70                                          
+    71                                          
+    72 00000062 52                              push dword edx
+    73 00000063 68[50000000]                    push dword msg3
+    74 00000068 FF15[00000000]                  call [printf]
+    75 0000006E 83C408                          add esp, 4*2
+    76                                          
+    77                                          ; exit(0)
+    78 00000071 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    79 00000073 FF15[00000000]                  call    [exit]       ; call exit to terminate the program

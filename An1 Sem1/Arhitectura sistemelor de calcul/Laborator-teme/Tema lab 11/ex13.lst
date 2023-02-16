@@ -1,0 +1,185 @@
+     1                                  bits 32 ; assembling for the 32 bits architecture
+     2                                  
+     3                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     4                                  global start        
+     5                                  
+     6                                  ; declare external functions needed by our program
+     7                                  extern exit, printf, scanf               ; tell nasm that exit exists even if we won't be defining it
+     8                                  import exit msvcrt.dll
+     9                                  import printf msvcrt.dll
+    10                                  import scanf msvcrt.dll    ; exit is a function that ends the calling process. It is defined in msvcrt.dll
+    11                                                            ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
+    12                                  
+    13                                  ; our data is declared here (the variables needed by our program)
+    14                                  segment data use32 class=data
+    15 00000000 496E74726F64756365-         mesaj db "Introduceti un sir de caractere: ", 0  ; mesaj
+    15 00000009 746920756E20736972-
+    15 00000012 206465206361726163-
+    15 0000001B 746572653A2000     
+    16 00000022 257300                      format_sir db "%s",0    ; format pentru sir
+    17 00000025 25730A0D00                  format_afisare db "%s",10,13,0    ; format de afisare cu '\n'
+    18 0000002A 256400                      f db "%d", 0                            ; format pentru numar
+    19                                      
+    20                                      max equ 100                             ; lungimea maxima a unui sir
+    21 0000002D 00<rept>                    sir1 times max db 0
+    22 00000091 00<rept>                    sir2 times max db 0
+    23 000000F5 00<rept>                    sir3 times max db 0
+    24                                      
+    25 00000159 00000000                    len1 dd 0                               ; variabile in care memoram lungimea fiecarui sir
+    26 0000015D 00000000                    len2 dd 0
+    27 00000161 00000000                    len3 dd 0
+    28                                      
+    29 00000165 00<rept>                    s12 times max db 0
+    30 000001C9 00<rept>                    s23 times max db 0
+    31 0000022D 00<rept>                    s31 times max db 0
+    32                                      
+    33                                      ; ...
+    34                                  
+    35                                  ; our code starts here
+    36                                  ; Se dau trei siruri de caractere. Sa se afiseze cel mai lung sufix comun pentru fiecare din cele trei perechi de cate doua siruri ce se pot forma.
+    37                                  ; Sabo Andrei Claudiu
+    38                                  segment code use32 class=code
+    39                                      get_len:
+    40                                      
+    41 00000000 8B442404                        mov eax, [esp+4]
+    42 00000004 BA00000000                      mov edx, 0
+    43                                          
+    44                                          .bucla
+    44          ******************       warning: label alone on a line without a colon might be in error [-w+orphan-labels]
+    45 00000009 803800                              cmp byte[eax], 0
+    46 0000000C 7407                                je .final
+    47 0000000E 668B18                              mov bx, [eax]
+    48 00000011 40                                  inc eax
+    49 00000012 42                                  inc edx
+    50 00000013 E2F4                            loop .bucla
+    51                                          
+    52                                          .final:
+    53                                          
+    54 00000015 C20400                          ret 4*1
+    55                                          
+    56                                      sufix_comun:
+    57                                          ; Stiva:
+    58                                          ; esp - revenire
+    59                                          ; esp + 4 - [len2]
+    60                                          ; esp + 8 - [len1]
+    61                                          ; esp + 12 - sir2
+    62                                          ; esp + 16 - sir1
+    63                                          ; esp + 20 - s12
+    64                                          
+    65 00000018 8B742410                        mov esi, [esp+16]   ; in ESI punem offsetul sirului 1 
+    66 0000001C 8B7C240C                        mov edi, [esp+12]   ; in EDI punem offsetul sirului 2
+    67 00000020 8B442408                        mov eax, [esp+8]    ; in eax punem valoarea variabilei len1
+    68 00000024 8B5C2404                        mov ebx, [esp+4]    ; in ebx punem valoarea variabilei len2
+    69                                          
+    70                                          
+    71                                          .bucla:                         ; Facem o bucla in care o sa luam in ordine inversa elementele celor 2 siruri si o se le comparam
+    72 00000028 8A6C06FF                            mov ch, [esi+eax-1]         ; salvam in ch ultimul element al sirului 1
+    73 0000002C 8A4C1FFF                            mov cl, [edi+ebx-1]         ; salvam in cl ultimul element al sirului 2
+    74                                              
+    75 00000030 38CD                                cmp ch,cl                   ; comparam elementele
+    76 00000032 750E                                jne .final                  ; daca nu sunt egale putem iesi din bucla
+    77 00000034 83F800                              cmp eax, 0                  ; daca un sir ramane fara elemente ne oprim
+    78 00000037 7409                                je .final
+    79 00000039 83FB00                              cmp ebx, 0
+    80 0000003C 7404                                je .final
+    81                                              
+    82 0000003E 48                                  dec eax                     ; decrementam eax si ebx
+    83 0000003F 4B                                  dec ebx
+    84 00000040 E2E6                            loop .bucla
+    85                                                                          ; in eax si ebx ne raman pozitiitle de unde incepe cel mai lung subsir comun
+    86                                          ;mov ebx, eax                    ; in ebx stocam punem pozitia de unde incepe sufixul
+    87                                          .final:
+    88 00000042 8B4C2408                         mov ecx, [esp+8]          
+    89 00000046 8B7C2414                         mov edi, [esp+20]              ; punem in edi offsetul s12, acolo pastram sufixul
+    90 0000004A 01C6                             add esi, eax                   ; in esi adaugam eax, astfel sirul incepe chiar de unde incepe cel mai lung suufix
+    91 0000004C FC                               cld
+    92                                          .loop:
+    93 0000004D A4                                  movsb                       ; mutam sufixul in sirul corespunzator
+    94 0000004E E2FD                            loop .loop
+    95                                          
+    96 00000050 C21400                          ret 4*5
+    97                                      start:
+    98                                          ; ...
+    99 00000053 68[00000000]                    push dword mesaj
+   100 00000058 68[22000000]                    push dword format_sir
+   101 0000005D FF15[00000000]                  call [printf]
+   102 00000063 83C408                          add esp, 4*2
+   103                                          
+   104 00000066 68[2D000000]                    push dword sir1                         ; Citim sirul 1 
+   105 0000006B 68[22000000]                    push dword format_sir
+   106 00000070 FF15[00000000]                  call [scanf]
+   107 00000076 83C408                          add esp, 4*2
+   108                                          
+   109 00000079 68[00000000]                    push dword mesaj
+   110 0000007E 68[22000000]                    push dword format_sir
+   111 00000083 FF15[00000000]                  call [printf]
+   112 00000089 83C408                          add esp, 4*2
+   113                                          
+   114 0000008C 68[91000000]                    push dword sir2                        ; Citim sirul 2
+   115 00000091 68[22000000]                    push dword format_sir
+   116 00000096 FF15[00000000]                  call [scanf]
+   117 0000009C 83C408                          add esp, 4*2
+   118                                          
+   119 0000009F 68[00000000]                    push dword mesaj
+   120 000000A4 68[22000000]                    push dword format_sir
+   121 000000A9 FF15[00000000]                  call [printf]
+   122 000000AF 83C408                          add esp, 4*2
+   123                                          
+   124 000000B2 68[F5000000]                    push dword sir3                        ; Citim sirul 3
+   125 000000B7 68[22000000]                    push dword format_sir
+   126 000000BC FF15[00000000]                  call [scanf]
+   127 000000C2 83C408                          add esp, 4*2
+   128                                          
+   129 000000C5 68[2D000000]                    push dword sir1
+   130 000000CA E831FFFFFF                      call get_len
+   131 000000CF 8915[59010000]                  mov [len1], edx
+   132                                          
+   133 000000D5 68[91000000]                    push dword sir2
+   134 000000DA E821FFFFFF                      call get_len
+   135 000000DF 8915[5D010000]                  mov [len2], edx
+   136                                          
+   137 000000E5 68[F5000000]                    push dword sir3                     ; Aflam lungimea fiecarui sir, iar rezultatele se pastreaza in varibilele len
+   138 000000EA E811FFFFFF                      call get_len
+   139 000000EF 8915[61010000]                  mov [len3], edx
+   140                                          
+   141 000000F5 68[65010000]                    push dword s12                      ; Pentru fiecare pereche de siruri se apeleaza functia si se scrie apoi rezultatul
+   142 000000FA 68[2D000000]                    push dword sir1
+   143 000000FF 68[91000000]                    push dword sir2
+   144 00000104 FF35[59010000]                  push dword [len1]
+   145 0000010A FF35[5D010000]                  push dword [len2]
+   146 00000110 E803FFFFFF                      call sufix_comun
+   147                                          
+   148 00000115 68[65010000]                    push dword s12
+   149 0000011A 68[25000000]                    push dword format_afisare
+   150 0000011F FF15[00000000]                  call [printf]
+   151 00000125 83C408                          add esp, 4*2
+   152                                          
+   153 00000128 68[C9010000]                    push dword s23
+   154 0000012D 68[91000000]                    push dword sir2
+   155 00000132 68[F5000000]                    push dword sir3
+   156 00000137 FF35[5D010000]                  push dword [len2]
+   157 0000013D FF35[61010000]                  push dword [len3]
+   158 00000143 E8D0FEFFFF                      call sufix_comun
+   159                                          
+   160 00000148 68[C9010000]                    push dword s23
+   161 0000014D 68[25000000]                    push dword format_afisare
+   162 00000152 FF15[00000000]                  call [printf]
+   163 00000158 83C408                          add esp, 4*2
+   164                                          
+   165 0000015B 68[2D020000]                    push dword s31
+   166 00000160 68[F5000000]                    push dword sir3
+   167 00000165 68[2D000000]                    push dword sir1
+   168 0000016A FF35[61010000]                  push dword [len3]
+   169 00000170 FF35[59010000]                  push dword [len1]
+   170 00000176 E89DFEFFFF                      call sufix_comun
+   171                                          
+   172 0000017B 68[2D020000]                    push dword s31
+   173 00000180 68[25000000]                    push dword format_afisare
+   174 00000185 FF15[00000000]                  call [printf]
+   175 0000018B 83C408                          add esp, 4*2
+   176                                          
+   177                                          ; sufixele se afiseaza fiecare pe alt rand pentru perechile (sir1,sir2),(sir2,sir3),(sir3,sir1)
+   178                                          
+   179                                          ; exit(0)
+   180 0000018E 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+   181 00000190 FF15[00000000]                  call    [exit]       ; call exit to terminate the program

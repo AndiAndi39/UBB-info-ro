@@ -1,0 +1,64 @@
+     1                                  bits 32 ; assembling for the 32 bits architecture
+     2                                  
+     3                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     4                                  global start        
+     5                                  
+     6                                  ; declare external functions needed by our program
+     7                                  extern exit               ; tell nasm that exit exists even if we won't be defining it
+     8                                  import exit msvcrt.dll    ; exit is a function that ends the calling process. It is defined in msvcrt.dll
+     9                                                            ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
+    10                                  
+    11                                  ; our data is declared here (the variables needed by our program)
+    12                                  segment data use32 class=data
+    13                                      ; ...
+    14 00000000 0A0000000A0000000B-         sir DD 10,10,11,11,11,10,3  ; sirul de dublucuvinte
+    14 00000009 0000000B0000000B00-
+    14 00000012 00000A000000030000-
+    14 0000001B 00                 
+    15                                      len equ ($-sir)/4       ; lungimea sirului
+    16 0000001C 00000000<rept>              rez times len DD 0  ; sirul rezultat
+    17                                  
+    18                                  ; Sabo Andrei Claudiu
+    19                                  ; Dandu-se un sir de dublucuvinte, sa se obtina un alt sir de dublucuvinte in care se vor pastra doar dublucuvintele din primul sir care au un numar par de biti cu valoare 1.
+    20                                  ; our code starts here
+    21                                  segment code use32 class=code
+    22                                      start:
+    23                                          ; ...
+    24 00000000 B907000000                      mov ecx, len        ; loop ul se executa de len ori
+    25 00000005 E331                            jecxz end_program
+    26                                          
+    27 00000007 BE[00000000]                    mov esi, sir        ; setam sirul sursa
+    28 0000000C BF[1C000000]                    mov edi, rez        ; setam sirul destinatie
+    29                                          
+    30 00000011 BA00000000                      mov edx, 0
+    31 00000016 FC                              cld
+    32                                          repeta:
+    33 00000017 AD                                  lodsd       ; avem nr in eax
+    34 00000018 89C3                                mov ebx, eax    ; punem numarul in ebx, sa nu modificam eax cand facem operatiile
+    35                                              
+    36 0000001A 51                                  push ecx        ; punem ecx pe stiva sa nu il modificam
+    37                                              
+    38 0000001B B920000000                          mov ecx, 32       ; o sa facem shr de 32 de ori, fiecare bit merge in CF si in edx contorizam cati biti de 1 sunt
+    39 00000020 BA00000000                          mov edx, 0
+    40                                              nr_biti:
+    41 00000025 D1EB                                    shr ebx, 1
+    42 00000027 83D200                                  adc edx, 0
+    43 0000002A E2F9                                loop nr_biti
+    44                                              
+    45 0000002C 59                                  pop ecx         ; luam ecx de pe stiva
+    46                                              
+    47 0000002D F7C201000000                        test edx, 1     
+    48                                              
+    49 00000033 7501                                jnz nr_impar_de_biti    ; daca nr are nr impar de biti 1 nu il punem in rezultat
+    50                                                  
+    51 00000035 AB                                  stosd
+    52                                              
+    53                                              nr_impar_de_biti:
+    54                                              
+    55 00000036 E2DF                            loop repeta
+    56                                          
+    57                                          end_program:
+    58                                          
+    59                                          ; exit(0)
+    60 00000038 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    61 0000003A FF15[00000000]                  call    [exit]       ; call exit to terminate the program

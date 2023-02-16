@@ -1,0 +1,12 @@
+Cary flag are implicare doar in adunari si scaderi.
+Cand depasim o adunare de byte cu byte se depaseste cu maxim un bit.
+
+Este aceasta operatie de adunare corecta?
+
+Din punct de vedere tehnic procesorul va seta valoare lui SF(flag) cu valoarea primului bit din stanga.
+
+La fel ca si carry flag si overflow flag are rol si implicare doar in adunari si scaderi.
+
+Cea mai simpla 
+
+Conceptul de depasire
